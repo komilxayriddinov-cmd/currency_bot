@@ -9,7 +9,7 @@ from telegram.ext import (
     filters
 )
 
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
+
 
 
 TOKEN = "8635192224:AAEC26fL4i92GzNBlhi3MAJOW2FbVR1LIQI"
@@ -163,18 +163,13 @@ app.add_handler(
 
 
 
-scheduler = AsyncIOScheduler()
 
-scheduler.add_job(
-    update_rates,
-    "interval",
-    days=1
-)
 
-import asyncio
+
+
 
 asyncio.get_event_loop().run_until_complete(asyncio.sleep(0))
-scheduler.start()
+
 
 
 
