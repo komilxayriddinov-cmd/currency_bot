@@ -12,7 +12,7 @@ from telegram.ext import (
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 
-TOKEN = 8635192224:AAEC26fL4i92GzNBlhi3MAJOW2FbVR1LIQI
+TOKEN = "8635192224:AAEC26fL4i92GzNBlhi3MAJOW2FbVR1LIQI"
 
 
 # получение курсов
