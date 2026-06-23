@@ -1,5 +1,4 @@
 import requests
-import json
 
 from telegram import Update, ReplyKeyboardMarkup
 from telegram.ext import (
@@ -10,11 +9,13 @@ from telegram.ext import (
     filters
 )
 
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
-TOKEN= "8635192224:AAEC26fL4i92GzNBlhi3MAJOW2FbVR1LIQI"
+
+TOKEN = 8635192224:AAEC26fL4i92GzNBlhi3MAJOW2FbVR1LIQI
 
 
-# Получаем курсы
+# получение курсов
 def get_rates():
 
     url = "https://api.exchangerate-api.com/v4/latest/USD"
@@ -22,15 +23,14 @@ def get_rates():
     data = requests.get(url).json()
 
     return {
-        "USD": 1,
+        "USD": data["rates"]["USD"],
         "EUR": data["rates"]["EUR"],
         "RUB": data["rates"]["RUB"],
         "UZS": data["rates"]["UZS"]
     }
 
 
-
-# Кнопки
+# кнопки
 keyboard = [
     ["💵 Доллар", "💶 Евро"],
     ["₽ Рубль", "📊 Все курсы"]
@@ -42,8 +42,7 @@ markup = ReplyKeyboardMarkup(
 )
 
 
-
-# Старт
+# старт
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     await update.message.reply_text(
@@ -53,56 +52,100 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 
-# Нажатия кнопок
+# кнопки
 async def buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     text = update.message.text
 
     rates = get_rates()
 
+    usd = rates["UZS"]
+
+    eur = rates["UZS"] / rates["EUR"]
+
+    rub = rates["UZS"] / rates["RUB"]
+
+
 
     if text == "💵 Доллар":
 
         await update.message.reply_text(
-            f"💵 1 USD = {rates['UZS']} сум"
+f"""
+💵 USD
+
+1$ = {usd:,.0f} сум
+100$ = {usd*100:,.0f} сум
+1000$ = {usd*1000:,.0f} сум
+10000$ = {usd*10000:,.0f} сум
+"""
         )
 
 
     elif text == "💶 Евро":
 
-        euro = rates["UZS"] / rates["EUR"]
-
         await update.message.reply_text(
-            f"💶 1 EUR = {round(euro)} сум"
+f"""
+💶 EUR
+
+1€ = {eur:,.0f} сум
+100€ = {eur*100:,.0f} сум
+1000€ = {eur*1000:,.0f} сум
+10000€ = {eur*10000:,.0f} сум
+"""
         )
 
 
     elif text == "₽ Рубль":
 
-        rub = rates["UZS"] / rates["RUB"]
-
         await update.message.reply_text(
-            f"₽ 1 RUB = {round(rub,2)} сум"
+f"""
+₽ RUB
+
+1₽ = {rub:.2f} сум
+100₽ = {rub*100:.2f} сум
+1000₽ = {rub*1000:.2f} сум
+10000₽ = {rub*10000:.2f} сум
+"""
         )
 
 
     elif text == "📊 Все курсы":
 
-        euro = rates["UZS"] / rates["EUR"]
-        rub = rates["UZS"] / rates["RUB"]
-
         await update.message.reply_text(
-            f"""
-💵 USD
-1 доллар = {rates['UZS']} сум
+f"""
+💵 Доллар
 
-💶 EUR
-1 евро = {round(euro)} сум
+1$ = {usd:,.0f} сум
+100$ = {usd*100:,.0f} сум
+1000$ = {usd*1000:,.0f} сум
+10000$ = {usd*10000:,.0f} сум
 
-₽ RUB
-1 рубль = {round(rub,2)} сум
+
+💶 Евро
+
+1€ = {eur:,.0f} сум
+100€ = {eur*100:,.0f} сум
+1000€ = {eur*1000:,.0f} сум
+10000€ = {eur*10000:,.0f} сум
+
+
+₽ Рубль
+
+1₽ = {rub:.2f} сум
+100₽ = {rub*100:.2f} сум
+1000₽ = {rub*1000:.2f} сум
+10000₽ = {rub*10000:.2f} сум
 """
         )
+
+
+
+# автообновление каждый день
+async def update_rates():
+
+    get_rates()
+
+    print("Курсы обновлены")
 
 
 
@@ -113,11 +156,26 @@ app.add_handler(
     CommandHandler("start", start)
 )
 
+
 app.add_handler(
     MessageHandler(filters.TEXT, buttons)
 )
 
 
+
+scheduler = AsyncIOScheduler()
+
+scheduler.add_job(
+    update_rates,
+    "interval",
+    days=1
+)
+
+scheduler.start()
+
+
+
 print("Бот запущен")
+
 
 app.run_polling()
