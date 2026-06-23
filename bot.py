@@ -171,6 +171,9 @@ scheduler.add_job(
     days=1
 )
 
+import asyncio
+
+asyncio.get_event_loop().run_until_complete(asyncio.sleep(0))
 scheduler.start()
 
 
