@@ -168,7 +168,6 @@ app.add_handler(
 
 
 
-asyncio.get_event_loop().run_until_complete(asyncio.sleep(0))
 
 
 
