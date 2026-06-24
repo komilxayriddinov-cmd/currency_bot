@@ -173,6 +173,18 @@ app.add_handler(
 
 
 print("Бот запущен")
+from flask import Flask
+from threading import Thread
 
+app_web = Flask(name)
+
+@app_web.route("/")
+def home():
+    return "Converter bot is alive"
+
+def run():
+    app_web.run(host="0.0.0.0", port=8080)
+
+Thread(target=run).start()
 
 app.run_polling()
